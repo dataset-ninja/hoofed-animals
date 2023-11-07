@@ -1,5 +1,19 @@
+The **Hoofed Animals** dataset is tailored for instance segmentation, semantic segmentation, and object detection tasks, comprising 200 images that collectively feature 714 labeled objects distributed among 6 distinct classes: *cow*, *horse*, *sheep*, along with additional categories like *deer*, *goat*, and *camel*. Notably, this dataset presents a challenge due to the subtle cross-category differences among similar animal categories, making it complex for algorithms to distinguish between them accurately. The animals within the dataset are articulated and non-rigid, appearing at various scales and often partially occluded within cluttered environments, posing additional challenges for effective detection and segmentation.
 
-Sample image template:
-<img src="https://github.com/dataset-ninja/gland-segmentation/assets/78355358/f158d0dd-71d5-41a2-aba5-4a5f57d54c35" alt="image" width="800">
+The hoofed animals dataset is designed to complement currently popular benchmarks, such as [Caltech-256](http://www.vision.caltech.edu/Image_Datasets/Caltech256/) and [PASCAL](http://www.pascal-network.org/challenges/VOC/databases.html). The major deficiencies of these datasets are that their images typically contain a single, prominently featured object from an object category, and that the categories used significantly differ in appearance and topology. In contrast, the hoofed animals dataset contains very similar categories, and therefore poses a challenge for an algorithm to resolve subtle cross-category differences. Since the animals are similar, they share a number of similar parts (e.g., horses and deer have similar limbs). Also, the animals have category-specific, discriminative subparts which allow for categorization (e.g., only deer have antlers). This makes the dataset suitable for evaluating which inter-category relationships an algorithm is capable of capturing (e.g., similarity in terms of shared parts, taxonomy in terms of shared and unshared parts, etc.). Another increase in complexity over popular benchmark datasets is that each image may contain multiple instances of multiple categories. Other challenges involve the following: the animals are articulated, non-rigid objects; (ii) they appear at different scales across the dataset; and (iii) may be partially occluded, amidst clutter.
 
-<span style="font-size: smaller; font-style: italic;">Image description.</span>
+These figures show detection, recognition, and segmentation on the test images shown in (c; rows 1,3) using the DAG learned on the training images shown in (a). The DAG successfully resolves the subtle differences among the animals, since it learns the subcategories of each of these six that are not shared, namely: camel’s hump and head, cow’s udder and head, deer’s antlers, goat’s beard and horns, horse’s reins, and mane; shown in (b) are the parts of the test images in (c) that got matched with the non-shared DAG nodes.
+
+<img width="513" alt="hoofed_animals_preview_1" src="https://github.com/dataset-ninja/hoofed-animals/assets/123257559/8ed75991-fb11-48d4-b0b9-f98c79c0dfa5">
+
+<span style="font-size: smaller; font-style: italic;"> Sample training images from Hoofed Animals: each image may contain multiple instances of very similar animals, posing a challenge for cross-category resolvability</span>
+
+<img width="800" alt="hoofed_animals_preview_2" src="https://github.com/dataset-ninja/hoofed-animals/assets/123257559/3fd424de-3357-45f2-b1f9-058e26b116aa">
+
+<span style="font-size: smaller; font-style: italic;"> Learned discriminative, non-shared subcategories of the target categories.</span>
+
+<img width="440" alt="hoofed_animals_preview_3" src="https://github.com/dataset-ninja/hoofed-animals/assets/123257559/5a1a8f83-b6a5-44a2-b9a1-ffb46045e9d2">
+
+<span style="font-size: smaller; font-style: italic;"> Masked out are the image parts not occupied by detected instances of target categories.</span>
+
+<i>Please note that the total number of objects differs. (715 in original/ 714 in dataset)</i>
