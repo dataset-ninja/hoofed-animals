@@ -1,9 +1,18 @@
 import supervisely as sly
+import cv2
+import numpy as np
 import os
 from dataset_tools.convert import unpack_if_archive
 import src.settings as s
 from urllib.parse import unquote, urlparse
-from supervisely.io.fs import get_file_name, get_file_size
+from supervisely.io.fs import (
+    get_file_name_with_ext,
+    get_file_name,
+    file_exists,
+    get_file_ext,
+    mkdir,
+    remove_dir,
+)
 import shutil
 
 from tqdm import tqdm
@@ -69,17 +78,118 @@ def count_files(path, extension):
 def convert_and_upload_supervisely_project(
     api: sly.Api, workspace_id: int, project_name: str
 ) -> sly.ProjectInfo:
-    ### Function should read local dataset and upload it to Supervisely project, then return project info.###
-    raise NotImplementedError("The converter should be implemented manually.")
-
-    # dataset_path = "/local/path/to/your/dataset" # general way
-    # dataset_path = download_dataset(teamfiles_dir) # for large datasets stored on instance
-
-    # ... some code here ...
-
-    # sly.logger.info('Deleting temporary app storage files...')
-    # shutil.rmtree(storage_dir)
-
-    # return project
+    dataset_path = "HoofedAnimals"
+    images_path = os.path.join("HoofedAnimals","org")
+    masks_path = os.path.join("HoofedAnimals","seg","masks")
+    ds_name = "ds"
+    batch_size = 30
+    images_ext = ".pgm"
+    new_images_ext = ".png"
+    masks_ext = "_mask.ppm"
 
 
+    def get_unique_colors(img):
+        unique_colors = []
+        img = img.astype(np.int32)
+        h, w = img.shape[:2]
+        colhash = img[:, :, 0] * 256 * 256 + img[:, :, 1] * 256 + img[:, :, 2]
+        unq, unq_inv, unq_cnt = np.unique(colhash, return_inverse=True, return_counts=True)
+        indxs = np.split(np.argsort(unq_inv), np.cumsum(unq_cnt[:-1]))
+        col2indx = {unq[i]: indxs[i][0] for i in range(len(unq))}
+        for col, indx in col2indx.items():
+            if col != 0:
+                unique_colors.append((col // (256**2), (col // 256) % 256, col % 256))
+
+        return unique_colors
+
+
+    def get_obj_class(color):
+        if color[1] == 0 and color[2] == 0:
+            return sheep
+        elif color[0] == 0 and color[2] == 0:
+            return horse
+        elif color[0] == 0 and color[1] == 0:
+            return cow
+        elif color[1] == 0:
+            return goat
+        elif color[2] == 0:
+            return deer
+        elif color[0] == 0:
+            return camel
+
+
+    def create_ann(image_path):
+        labels = []
+
+        image_np = cv2.imread(image_path)
+        img_height = image_np.shape[0]
+        img_wight = image_np.shape[1]
+
+        image_name = get_file_name(image_path)
+
+        mask_path = os.path.join(masks_path, image_name + masks_ext)
+        mask_np = cv2.imread(mask_path)
+        mask_height = mask_np.shape[0]
+        mask_wight = mask_np.shape[1]
+        if img_height != mask_height or img_wight != mask_wight:
+            mask_np = cv2.resize(mask_np, (img_wight, img_height), interpolation=cv2.INTER_NEAREST)
+        unique_colors = get_unique_colors(mask_np)
+        for color in unique_colors:
+            obj_class = get_obj_class(color)
+            mask = np.all(mask_np == color, axis=2)
+            curr_bitmap = sly.Bitmap(mask)
+            curr_label = sly.Label(curr_bitmap, obj_class)
+            labels.append(curr_label)
+
+        return sly.Annotation(img_size=(img_height, img_wight), labels=labels)
+
+
+    sheep = sly.ObjClass("sheep", sly.Bitmap, color=(0, 0, 255))
+    horse = sly.ObjClass("horse", sly.Bitmap, color=(0, 255, 0))
+    cow = sly.ObjClass("cow", sly.Bitmap, color=(255, 0, 0))
+    goat = sly.ObjClass("goat", sly.Bitmap, color=(255, 0, 255))
+    deer = sly.ObjClass("deer", sly.Bitmap, color=(0, 255, 255))
+    camel = sly.ObjClass("camel", sly.Bitmap, color=(255, 255, 0))
+
+
+    project = api.project.create(workspace_id, project_name, change_name_if_conflict=True)
+    meta = sly.ProjectMeta(obj_classes=[cow, horse, sheep, goat, camel, deer])
+    api.project.update_meta(project.id, meta.to_json())
+
+    dataset = api.dataset.create(project.id, ds_name, change_name_if_conflict=True)
+
+    images_names = [
+        im_name for im_name in os.listdir(images_path) if get_file_ext(im_name) == images_ext
+    ]
+
+    progress = sly.Progress("Create dataset {}".format(ds_name), len(images_names))
+
+    for img_names_batch in sly.batched(images_names, batch_size=batch_size):
+        images_pathes_batch = [os.path.join(images_path, image_name) for image_name in img_names_batch]
+
+        # TODO =========================== must have, check EXIF Rotate 90 =========================
+        temp_img_pathes_batch = []
+        temp_img_names_batch = []
+        temp_folder = os.path.join(dataset_path, "temp")
+        mkdir(temp_folder)
+        for im_path in images_pathes_batch:
+            temp_img = cv2.imread(im_path)
+            new_im_name = get_file_name(im_path) + new_images_ext
+            temp_img_names_batch.append(new_im_name)
+            new_img_path = os.path.join(temp_folder, new_im_name)
+            temp_img_pathes_batch.append(new_img_path)
+            cv2.imwrite(new_img_path, temp_img)
+
+        # TODO =======================================================================================
+
+        img_infos = api.image.upload_paths(dataset.id, temp_img_names_batch, temp_img_pathes_batch)
+        img_ids = [im_info.id for im_info in img_infos]
+
+        anns_batch = [create_ann(image_path) for image_path in temp_img_pathes_batch]
+        api.annotation.upload_anns(img_ids, anns_batch)
+
+        remove_dir(temp_folder)
+
+        progress.iters_done_report(len(temp_img_names_batch))
+
+    return project
