@@ -8,7 +8,7 @@ These figures show detection, recognition, and segmentation on the test images s
 
 <span style="font-size: smaller; font-style: italic;"> Sample training images from Hoofed Animals: each image may contain multiple instances of very similar animals, posing a challenge for cross-category resolvability</span>
 
-<img width="800" alt="hoofed_animals_preview_2" src="https://github.com/dataset-ninja/hoofed-animals/assets/123257559/3fd424de-3357-45f2-b1f9-058e26b116aa">
+<img width="828" alt="hoofed_animals_preview_2" src="https://github.com/dataset-ninja/hoofed-animals/assets/123257559/afce32a5-48e2-452d-92f6-d87b06fdf058">
 
 <span style="font-size: smaller; font-style: italic;"> Learned discriminative, non-shared subcategories of the target categories.</span>
 
