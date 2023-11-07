@@ -5,7 +5,7 @@ The hoofed animals dataset is designed to complement currently popular benchmark
 These figures show detection, recognition, and segmentation on the test images shown in (third image; rows 1,3) using the DAG (Directed
 Acyclic Graph) learned on the training images shown in the first image. The DAG successfully resolves the subtle differences among the animals, since it learns the subcategories of each of these six that are not shared, namely: camel’s hump and head, cow’s udder and head, deer’s antlers, goat’s beard and horns, horse’s reins, and mane; shown in second image are the parts of the test images in third image that got matched with the non-shared DAG nodes.
 
-<img width="513" alt="hoofed_animals_preview_1" src="https://github.com/dataset-ninja/hoofed-animals/assets/123257559/8ed75991-fb11-48d4-b0b9-f98c79c0dfa5">
+<img width="700" alt="hoofed_animals_preview_1" src="https://github.com/dataset-ninja/hoofed-animals/assets/123257559/8ed75991-fb11-48d4-b0b9-f98c79c0dfa5">
 
 <span style="font-size: smaller; font-style: italic;"> Sample training images from Hoofed Animals: each image may contain multiple instances of very similar animals, posing a challenge for cross-category resolvability</span>
 
