@@ -21,8 +21,8 @@ HIDE_DATASET = True  # set False when 100% sure about repo quality
 # * After uploading to instance ##
 ##################################
 LICENSE: License = License.Unknown()
-APPLICATIONS: List[Union[Industry, Domain, Research]] = [Industry.Environmental()]
-CATEGORY: Category = Category.Environmental()
+APPLICATIONS: List[Union[Industry, Domain, Research]] = [Domain.General()]
+CATEGORY: Category = Category.General()
 
 CV_TASKS: List[CVTask] = [CVTask.InstanceSegmentation(), CVTask.SemanticSegmentation(), CVTask.ObjectDetection()]
 ANNOTATION_TYPES: List[AnnotationType] = [AnnotationType.InstanceSegmentation()]
@@ -43,7 +43,7 @@ GITHUB_URL: str = "https://github.com/dataset-ninja/hoofed-animals"
 ##################################
 ### * Optional after uploading ###
 ##################################
-DOWNLOAD_ORIGINAL_URL: Optional[Union[str, dict]] = ["https://web.engr.oregonstate.edu/~sinisa/HoofedAnimalsDataset.html"]
+DOWNLOAD_ORIGINAL_URL: Optional[Union[str, dict]] = "https://web.engr.oregonstate.edu/~sinisa/HoofedAnimalsDataset.html"
 # Optional link for downloading original dataset (e.g. "https://some.com/dataset/download")
 
 CLASS2COLOR: Optional[Dict[str, List[str]]] = None

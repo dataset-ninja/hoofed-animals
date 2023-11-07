@@ -16,5 +16,3 @@ Acyclic Graph) learned on the training images shown in the first image. The DAG 
 <img width="440" alt="hoofed_animals_preview_3" src="https://github.com/dataset-ninja/hoofed-animals/assets/123257559/5a1a8f83-b6a5-44a2-b9a1-ffb46045e9d2">
 
 <span style="font-size: smaller; font-style: italic;"> Masked out are the image parts not occupied by detected instances of target categories.</span>
-
-<i>Please note that the total number of objects differs. (715 in original/ 714 in dataset)</i>
